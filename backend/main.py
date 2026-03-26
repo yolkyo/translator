@@ -5,29 +5,40 @@ import asyncio
 import websockets
 from googletrans import Translator
 
+# 載入 Whisper 模型
 model = whisper.load_model("small")
 translator = Translator()
-duration = 1
-sample_rate = 16000
 
-# 找出可用裝置
-print(sd.query_devices())
+# 錄音設定
+duration = 5          # 每次錄音秒數
+sample_rate = 16000   # 取樣率
 
-# 設定 Virtual Cable 為輸入裝置 (通常是 "CABLE Output")
+# 指定音訊裝置 (先用 sd.query_devices() 找出正確名稱或編號)
+# 例如 "CABLE Output (VB-Audio Virtual Cable)"
 sd.default.device = "CABLE Output (VB-Audio Virtual Cable)"
 
-async def send_translation(websocket, path):
+async def send_translation(websocket):
     while True:
         print("🎧 錄製直播音訊中...")
         audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
         sd.wait()
         audio_data = np.squeeze(audio)
+
+        # Whisper 辨識
         result = model.transcribe(audio_data, fp16=False)
-        original_text = result["text"]
-        translated = translator.translate(original_text, src="auto", dest="zh-TW")
-        await websocket.send(translated.text)
+        original_text = result["text"].strip()
+
+        if original_text:
+            print("📝 辨識結果:", original_text)
+            # 翻譯成中文
+            translated = translator.translate(original_text, src="auto", dest="zh-TW")
+            print("🌐 翻譯結果:", translated.text)
+            await websocket.send(translated.text)
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
-        await asyncio.Future()
-asyncio.run(main())
+        print("✅ WebSocket 伺服器已啟動，等待前端連線...")
+        await asyncio.Future()  # 保持伺服器運行
+
+if __name__ == "__main__":
+    asyncio.run(main())
