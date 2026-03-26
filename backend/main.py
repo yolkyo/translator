@@ -9,15 +9,14 @@ from googletrans import Translator
 model = whisper.load_model("small")
 translator = Translator()
 
-# 錄音設定
-duration = 5          # 每次錄音秒數
-sample_rate = 16000   # 取樣率
+# 音訊設定
+duration = 5        # 每次錄音秒數
+sample_rate = 16000 # 取樣率
 
 # 指定音訊裝置 (先用 sd.query_devices() 找出正確名稱或編號)
-# 例如 "CABLE Output (VB-Audio Virtual Cable)"
 sd.default.device = "CABLE Output (VB-Audio Virtual Cable)"
 
-async def send_translation(websocket, path):  # 注意這裡要有兩個參數
+async def send_translation(websocket, path):  # 必須有兩個參數
     while True:
         print("🎧 錄製直播音訊中...")
         audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
@@ -39,9 +38,6 @@ async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
         print("✅ WebSocket 伺服器已啟動，等待前端連線...")
         await asyncio.Future()  # 保持伺服器運行
-
-if __name__ == "__main__":
-    asyncio.run(main())
 
 if __name__ == "__main__":
     asyncio.run(main())
