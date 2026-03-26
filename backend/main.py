@@ -7,8 +7,14 @@ from googletrans import Translator
 
 model = whisper.load_model("small")
 translator = Translator()
-duration = 5
+duration = 1
 sample_rate = 16000
+
+# 找出可用裝置
+print(sd.query_devices())
+
+# 設定 Virtual Cable 為輸入裝置 (通常是 "CABLE Output")
+sd.default.device = "CABLE Output (VB-Audio Virtual Cable)"
 
 async def send_translation(websocket, path):
     while True:
