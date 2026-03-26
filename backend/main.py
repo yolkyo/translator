@@ -27,10 +27,7 @@ async def send_translation(websocket, path):
         translated = translator.translate(original_text, src="auto", dest="zh-TW")
         await websocket.send(translated.text)
 
-start_server = websockets.serve(send_translation, "localhost", 8765)
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
-
-from googletrans import Translator
-t = Translator()
-print(t.translate("Hello world", src="en", dest="zh-TW").text)
+async def main():
+    async with websockets.serve(send_translation, "localhost", 8765):
+        await asyncio.Future()
+asyncio.run(main())
