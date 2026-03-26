@@ -16,7 +16,7 @@ sample_rate = 16000 # 取樣率
 # 指定音訊裝置 (先用 sd.query_devices() 找出正確名稱或編號)
 sd.default.device = "CABLE Output (VB-Audio Virtual Cable)"
 
-async def send_translation(websocket, path):  # 必須有兩個參數
+async def send_translation(websocket):  # 必須有兩個參數
     while True:
         print("🎧 錄製直播音訊中...")
         audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
