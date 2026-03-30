@@ -35,10 +35,13 @@ async def send_translation(websocket):
                 result = model.transcribe("temp.wav", fp16=False)
                 original_text = result["text"].strip()
 
-                if original_text:  # 只送出有內容的翻譯
+                if original_text:
                     translated = translator.translate(original_text, src="auto", dest="zh-TW")
-                    # 用 "||" 分隔原文與翻譯
-                    await websocket.send(f"{original_text}||{translated.text}")
+                    try:
+                        await websocket.send(f"{original_text}||{translated.text}")
+                    except websockets.exceptions.ConnectionClosedOK:
+                        print("⚠️ 前端已斷線，停止錄音")
+                        break  # 跳出迴圈，停止錄音
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
