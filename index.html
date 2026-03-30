@@ -44,6 +44,11 @@
     button:hover {
       background-color: #444;
     }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #0f0; /* 翻譯中顯示綠色 */
+    }
   </style>
 </head>
 <body>
@@ -54,6 +59,7 @@
     <button id="stopBtn">結束翻譯</button>
     <button id="clearBtn">清除字幕</button>
   </div>
+  <div id="status">狀態：已停止</div>
 
   <script>
     let socket = null;
@@ -61,6 +67,14 @@
     function startTranslation() {
       if (socket && socket.readyState === WebSocket.OPEN) return; // 已連線就不重複
       socket = new WebSocket("ws://localhost:8765");
+      socket.onopen = function() {
+        document.getElementById("status").textContent = "狀態：翻譯中";
+        document.getElementById("status").style.color = "#0f0"; // 綠色
+      };
+      socket.onclose = function() {
+        document.getElementById("status").textContent = "狀態：已停止";
+        document.getElementById("status").style.color = "#f00"; // 紅色
+      };
       socket.onmessage = function(event) {
         const output = document.getElementById("output");
         const [original, translated] = event.data.split("||");
