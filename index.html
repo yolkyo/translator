@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>即時翻譯字幕</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+<html>
 <body>
-  <div id="subtitle">等待翻譯中...</div>
-  <script src="script.js"></script>
+<div id="subtitle" style="font-size:24px; color:white; background:black;"></div>
+<script>
+  const ws = new WebSocket("ws://localhost:8765");
+  ws.onmessage = (event) => {
+    document.getElementById("subtitle").innerText = event.data;
+  };
+</script>
 </body>
 </html>
