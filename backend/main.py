@@ -1,6 +1,6 @@
 import whisper
 import sounddevice as sd
-import numpy as np
+import soundfile as sf
 import asyncio
 import websockets
 from googletrans import Translator
@@ -10,25 +10,28 @@ model = whisper.load_model("small")
 translator = Translator()
 
 # 音訊設定
-duration = 5        # 每次錄音秒數
-sample_rate = 16000 # 取樣率
+duration = 5         # 每次錄音秒數
+sample_rate = 48000  # Virtual Cable 常用支援的取樣率
+device_id = 40       # WASAPI 的 CABLE Output
+channels = 2
 
 async def send_translation(websocket): 
     while True:
         print("🎧 錄製直播音訊中...")
         audio = sd.rec(
-        int(duration * sample_rate),
-        samplerate=sample_rate,
-        channels=2,
-        dtype='float32',
-        device=40  # 明確指定只用編號 6
+            int(duration * sample_rate),
+            samplerate=sample_rate,
+            channels=channels,
+            dtype='float32',
+            device=device_id
         )
-
         sd.wait()
-        audio_data = np.squeeze(audio)
+
+        # 存成暫存檔，Whisper 讀檔最穩定
+        sf.write("temp.wav", audio, sample_rate)
 
         # Whisper 辨識
-        result = model.transcribe(audio_data, fp16=False)
+        result = model.transcribe("temp.wav", fp16=False)
         original_text = result["text"].strip()
 
         if original_text:
