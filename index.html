@@ -30,36 +30,76 @@
       text-align: right;
       color: #fff; /* 翻譯純白色 */
     }
+    #controls {
+      margin-top: 10px;
+    }
+    button {
+      background-color: #222;
+      color: white;
+      border: 1px solid #555;
+      padding: 8px 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #444;
+    }
   </style>
 </head>
 <body>
   <h1>即時翻譯字幕</h1>
   <div id="output"></div>
+  <div id="controls">
+    <button id="startBtn">開始翻譯</button>
+    <button id="stopBtn">結束翻譯</button>
+    <button id="clearBtn">清除字幕</button>
+  </div>
 
   <script>
-    const socket = new WebSocket("ws://localhost:8765");
-    socket.onmessage = function(event) {
+    let socket = null;
+
+    function startTranslation() {
+      if (socket && socket.readyState === WebSocket.OPEN) return; // 已連線就不重複
+      socket = new WebSocket("ws://localhost:8765");
+      socket.onmessage = function(event) {
+        const output = document.getElementById("output");
+        const [original, translated] = event.data.split("||");
+
+        const div = document.createElement("div");
+        div.className = "line";
+
+        const origSpan = document.createElement("span");
+        origSpan.className = "original";
+        origSpan.textContent = original;
+
+        const transSpan = document.createElement("span");
+        transSpan.className = "translated";
+        transSpan.textContent = translated;
+
+        div.appendChild(origSpan);
+        div.appendChild(transSpan);
+        output.appendChild(div);
+
+        // 自動捲到最新字幕
+        output.scrollTop = output.scrollHeight;
+      };
+    }
+
+    function stopTranslation() {
+      if (socket) {
+        socket.close();
+        socket = null;
+      }
+    }
+
+    function clearSubtitles() {
       const output = document.getElementById("output");
-      const [original, translated] = event.data.split("||");
+      output.innerHTML = "";
+    }
 
-      const div = document.createElement("div");
-      div.className = "line";
-
-      const origSpan = document.createElement("span");
-      origSpan.className = "original";
-      origSpan.textContent = original;
-
-      const transSpan = document.createElement("span");
-      transSpan.className = "translated";
-      transSpan.textContent = translated;
-
-      div.appendChild(origSpan);
-      div.appendChild(transSpan);
-      output.appendChild(div);
-
-      // 自動捲到最新字幕
-      output.scrollTop = output.scrollHeight;
-    };
+    document.getElementById("startBtn").addEventListener("click", startTranslation);
+    document.getElementById("stopBtn").addEventListener("click", stopTranslation);
+    document.getElementById("clearBtn").addEventListener("click", clearSubtitles);
   </script>
 </body>
 </html>
