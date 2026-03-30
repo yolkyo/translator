@@ -17,29 +17,48 @@ channels = 2
 
 async def send_translation(websocket): 
     while True:
-        print("🎧 錄製直播音訊中...")
-        audio = sd.rec(
-            int(duration * sample_rate),
-            samplerate=sample_rate,
-            channels=channels,
-            dtype='float32',
-            device=device_id
-        )
-        sd.wait()
+        try:
+            print("🎧 錄製直播音訊中...")
+            audio = sd.rec(
+                int(duration * sample_rate),
+                samplerate=sample_rate,
+                channels=channels,
+                dtype='float32',
+                device=device_id
+            )
+            sd.wait()
 
-        # 存成暫存檔，Whisper 讀檔最穩定
-        sf.write("temp.wav", audio, sample_rate)
+            # 存成暫存檔，Whisper 讀檔最穩定
+            sf.write("temp.wav", audio, sample_rate)
 
-        # Whisper 辨識
-        result = model.transcribe("temp.wav", fp16=False)
-        original_text = result["text"].strip()
+            # Whisper 辨識
+            try:
+                result = model.transcribe("temp.wav", fp16=False)
+                original_text = result["text"].strip()
+            except Exception as e:
+                error_msg = f"⚠️ Whisper 辨識錯誤: {e}"
+                print(error_msg)
+                await websocket.send(error_msg)
+                continue
 
-        if original_text:
-            print("📝 辨識結果:", original_text)
-            # 翻譯成中文
-            translated = translator.translate(original_text, src="auto", dest="zh-TW")
-            print("🌐 翻譯結果:", translated.text)
-            await websocket.send(translated.text)
+            if original_text:
+                print("📝 辨識結果:", original_text)
+                # 翻譯成中文
+                try:
+                    translated = translator.translate(original_text, src="auto", dest="zh-TW")
+                    print("🌐 翻譯結果:", translated.text)
+                    await websocket.send(translated.text)
+                except Exception as e:
+                    error_msg = f"⚠️ 翻譯錯誤: {e}"
+                    print(error_msg)
+                    await websocket.send(error_msg)
+            else:
+                await websocket.send("⚠️ 沒有辨識到有效語音")
+
+        except Exception as e:
+            error_msg = f"⚠️ 錄音錯誤: {e}"
+            print(error_msg)
+            await websocket.send(error_msg)
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
