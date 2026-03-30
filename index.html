@@ -33,7 +33,10 @@
     }
     #controls {
       margin-top: 15px;
-      text-align: center;
+      display: flex;          /* 使用 flex 排版 */
+      align-items: center;    /* 垂直置中 */
+      justify-content: flex-start; /* 靠左排列 */
+      gap: 15px;              /* 元素之間留間距 */
     }
     button {
       background-color: #222;
@@ -48,9 +51,7 @@
       background-color: #444;
     }
     #status {
-      margin-top: 15px;
       font-weight: bold;
-      text-align: center;
       color: #f00; /* 初始狀態紅色 */
       font-size: 18px;
     }
@@ -59,12 +60,12 @@
 <body>
   <div id="output"></div>
   <div id="controls">
+    <div id="status">狀態：已停止</div>
     <button id="startBtn">開始翻譯</button>
     <button id="stopBtn">結束翻譯</button>
     <button id="clearBtn">清除字幕</button>
   </div>
-  <div id="status">狀態：已停止</div>
-
+  
   <script>
     let socket = null;
 
