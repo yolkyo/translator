@@ -1,12 +1,13 @@
 import whisper
 import sounddevice as sd
 import soundfile as sf
+import numpy as np
 import asyncio
 import websockets
 from googletrans import Translator
 
 # 明確指定 WASAPI 的 Virtual Cable
-device_id = 46   # CABLE Output (VB-Audio Virtual Cable), Windows WASAPI
+device_id = 46   # 請確認這是 WASAPI 的 index
 channels = 2
 sample_rate = 48000
 
@@ -19,18 +20,20 @@ translator = Translator()
 
 duration = 5  # 每次錄音秒數
 
+def record_once():
+    """使用 InputStream 錄音，避免 sd.rec() 的名字解析問題"""
+    with sd.InputStream(samplerate=sample_rate,
+                        channels=channels,
+                        device=device_id,
+                        dtype='float32') as stream:
+        audio, _ = stream.read(int(duration * sample_rate))
+        return np.array(audio)
+
 async def send_translation(websocket): 
     while True:
         try:
             print("🎧 錄製直播音訊中...")
-            audio = sd.rec(
-                int(duration * sample_rate),
-                samplerate=sample_rate,
-                channels=channels,
-                dtype='float32',
-                device=device_id
-            )
-            sd.wait()
+            audio = record_once()
 
             # 存成暫存檔
             sf.write("temp.wav", audio, sample_rate)
