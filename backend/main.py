@@ -41,8 +41,6 @@ async def send_translation(websocket):
                 if original_text:
                     translated = translator.translate(original_text, src="auto", dest="zh-TW")
                     await websocket.send(translated.text)
-                else:
-                    await websocket.send("⚠️ 沒有辨識到有效語音")
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
