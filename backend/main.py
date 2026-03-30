@@ -12,7 +12,7 @@ translator = Translator()
 # 音訊設定
 duration = 5         # 每次錄音秒數
 sample_rate = 48000  # Virtual Cable 常用支援的取樣率
-device_id = 40       # WASAPI 的 CABLE Output
+device_id = 47       # WASAPI 的 CABLE Output
 channels = 2
 
 try:
