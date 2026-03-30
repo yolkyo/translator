@@ -19,7 +19,14 @@ sd.default.device = (6, None)  # 使用 CABLE Input (VB-Audio Virtual Cable)
 async def send_translation(websocket): 
     while True:
         print("🎧 錄製直播音訊中...")
-        audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
+        audio = sd.rec(
+        int(duration * sample_rate),
+        samplerate=sample_rate,
+        channels=1,
+        dtype='float32',
+        device=6  # 明確指定只用編號 6
+        )
+
         sd.wait()
         audio_data = np.squeeze(audio)
 
