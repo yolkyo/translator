@@ -6,7 +6,7 @@ import websockets
 from googletrans import Translator
 
 # 明確指定 WASAPI 的 Virtual Cable
-device_id = 40   # CABLE Output (VB-Audio Virtual Cable), Windows WASAPI
+device_id = 46   # CABLE Output (VB-Audio Virtual Cable), Windows WASAPI
 channels = 2
 sample_rate = 48000
 
