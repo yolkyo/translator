@@ -9,34 +9,49 @@
       color: white;
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* 讓整個畫面滿版 */
     }
     #output {
-      height: 30vh; /* 視窗高度的 30%，會隨視窗大小改變 */
+      flex: 1; /* 占滿剩餘空間 */
       border: 1px solid #444;
-      padding: 10px;
-      overflow: hidden;
+      padding: 20px;
+      overflow: hidden; /* 不要捲動條 */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* 讓字幕置中顯示 */
     }
     .subtitle-block {
       margin-bottom: 20px;
     }
     .original {
       text-align: center;
-      color: #aaa; /* 原文灰白色 */
-      font-size: 20px; /* 固定字體大小 */
+      color: #aaa;
+      font-size: 20px;
     }
     .translated {
       text-align: center;
-      color: #fff; /* 翻譯純白色 */
-      font-size: 22px; /* 固定字體大小 */
+      color: #fff;
+      font-size: 22px;
       font-weight: bold;
     }
+    #footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* 左右分佈 */
+      padding: 10px 20px;
+      border-top: 1px solid #444;
+    }
+    #status {
+      font-weight: bold;
+      color: #f00; /* 初始狀態紅色 */
+      font-size: 18px;
+    }
     #controls {
-      margin-top: 15px;
-      display: flex;          /* 使用 flex 排版 */
-      align-items: center;    /* 垂直置中 */
-      justify-content: flex-start; /* 靠左排列 */
-      gap: 15px;              /* 元素之間留間距 */
+      text-align: center;
+      flex: 1;
     }
     button {
       background-color: #222;
@@ -49,11 +64,6 @@
     }
     button:hover {
       background-color: #444;
-    }
-    #status {
-      font-weight: bold;
-      color: #f00; /* 初始狀態紅色 */
-      font-size: 18px;
     }
   </style>
 </head>
