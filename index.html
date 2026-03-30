@@ -78,7 +78,7 @@
       };
       socket.onmessage = function(event) {
         const output = document.getElementById("output");
-        const [original, translated] = event.data.split("||");
+        const [original, translated] = event.data.split("|");
 
         const block = document.createElement("div");
         block.className = "subtitle-block";
