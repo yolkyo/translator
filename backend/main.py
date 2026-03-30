@@ -7,7 +7,7 @@ import websockets
 from googletrans import Translator
 
 # 明確指定 WASAPI 的 Virtual Cable
-device_id = 46   # 請確認這是 WASAPI 的 index
+device_id = 47   # 請確認這是 WASAPI 的 index
 channels = 2
 sample_rate = 48000
 
