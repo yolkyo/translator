@@ -35,13 +35,24 @@ async def send_translation(websocket):
                 result = model.transcribe("temp.wav", fp16=False)
                 original_text = result["text"].strip()
 
-                if original_text and len(original_text) > 2:
-                    translated = translator.translate(original_text, src="auto", dest="zh-TW")
-                    try:
-                        await websocket.send(f"{original_text}||{translated.text}")
-                    except websockets.exceptions.ConnectionClosedOK:
-                        print("⚠️ 前端已斷線，停止錄音")
-                        break  # 跳出迴圈，停止錄音
+                # 取 Whisper 的 no_speech_prob（判斷是否為靜音）
+                segments = result.get("segments", [])
+                no_speech_prob = segments[0]["no_speech_prob"] if segments else 1.0
+
+                # 過濾條件：
+                # 1. 必須有文字
+                # 2. 如果字數大於 2，直接送出
+                # 3. 如果字數 ≤ 2，但模型判斷不是靜音 (no_speech_prob < 0.3)，也允許送出
+                # 4. 可選：排除常見假字幕（例如 "謝謝", "Thank you"）
+                blacklist = ["謝謝", "Thank you"]
+
+                if original_text and (len(original_text) > 2 or no_speech_prob < 0.3):
+                    if original_text not in blacklist:
+                        translated = translator.translate(original_text, src="auto", dest="zh-TW")
+                        try:
+                            await websocket.send(f"{original_text}|{translated.text}")
+                        except websockets.exceptions.ConnectionClosedOK:
+                            print("🔴 前端已斷線，停止錄音")
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
