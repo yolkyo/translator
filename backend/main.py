@@ -4,6 +4,7 @@ import asyncio
 import websockets
 from googletrans import Translator
 import numpy as np
+import soundfile as sf
 
 device_id = 40   # CABLE Output (VB-Audio Virtual Cable), Windows WASAPI
 channels = 2
@@ -13,7 +14,6 @@ model = whisper.load_model("small")
 translator = Translator()
 
 async def send_translation(websocket):
-    loop = asyncio.get_event_loop()
     audio_buffer = []
 
     def callback(indata, frames, time, status):
@@ -30,17 +30,15 @@ async def send_translation(websocket):
                 audio = np.concatenate(audio_buffer, axis=0)
                 audio_buffer.clear()
 
-                # Whisper 辨識
-                sf_path = "temp.wav"
-                import soundfile as sf
-                sf.write(sf_path, audio, sample_rate)
+                sf.write("temp.wav", audio, sample_rate)
 
-                result = model.transcribe(sf_path, fp16=False)
+                result = model.transcribe("temp.wav", fp16=False)
                 original_text = result["text"].strip()
 
-                if original_text:
+                if original_text:  # 只送出有內容的翻譯
                     translated = translator.translate(original_text, src="auto", dest="zh-TW")
-                    await websocket.send(translated.text)
+                    # 用 "||" 分隔原文與翻譯
+                    await websocket.send(f"{original_text}||{translated.text}")
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
