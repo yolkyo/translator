@@ -5,15 +5,16 @@ import asyncio
 import websockets
 from googletrans import Translator
 
-# 🔎 自動偵測 Virtual Cable 裝置
+# 🔎 自動偵測 Virtual Cable 裝置 (只挑 WASAPI)
 def find_virtual_cable_device():
     devices = sd.query_devices()
     for idx, dev in enumerate(devices):
         name = dev['name']
-        if "CABLE" in name and dev['max_input_channels'] > 0:
-            print(f"找到可用裝置: {name} (index={idx}, channels={dev['max_input_channels']})")
+        hostapi = sd.query_hostapis()[dev['hostapi']]['name']
+        if "CABLE Output" in name and "WASAPI" in hostapi and dev['max_input_channels'] > 0:
+            print(f"選用裝置: {name} (index={idx}, channels={dev['max_input_channels']}, hostapi={hostapi})")
             return idx, dev['max_input_channels']
-    raise RuntimeError("⚠️ 沒有找到可用的 Virtual Cable 錄音裝置")
+    raise RuntimeError("⚠️ 沒有找到可用的 Virtual Cable WASAPI 錄音裝置")
 
 # 自動選擇裝置
 device_id, channels = find_virtual_cable_device()
