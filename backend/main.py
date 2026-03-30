@@ -5,22 +5,27 @@ import asyncio
 import websockets
 from googletrans import Translator
 
+# 🔎 自動偵測 Virtual Cable 裝置
+def find_virtual_cable_device():
+    devices = sd.query_devices()
+    for idx, dev in enumerate(devices):
+        name = dev['name']
+        if "CABLE" in name and dev['max_input_channels'] > 0:
+            print(f"找到可用裝置: {name} (index={idx}, channels={dev['max_input_channels']})")
+            return idx, dev['max_input_channels']
+    raise RuntimeError("⚠️ 沒有找到可用的 Virtual Cable 錄音裝置")
+
+# 自動選擇裝置
+device_id, channels = find_virtual_cable_device()
+
 # 載入 Whisper 模型
 model = whisper.load_model("small")
 translator = Translator()
 
 # 音訊設定
 duration = 5         # 每次錄音秒數
-sample_rate = 48000  # Virtual Cable 常用支援的取樣率
-device_id = 47       # WASAPI 的 CABLE Output
-channels = 2
+sample_rate = 48000  # 常用支援的取樣率
 
-try:
-    sd.check_input_settings(device=device_id, samplerate=sample_rate, channels=channels)
-except Exception as e:
-    print(f"⚠️ 錯誤：裝置設定不支援 → {e}")
-    return
-    
 async def send_translation(websocket): 
     while True:
         try:
@@ -32,13 +37,6 @@ async def send_translation(websocket):
                 dtype='float32',
                 device=device_id
             )
-            except Exception as e:
-            error_msg = f"⚠️ 系統錯誤: {e}"
-            print(error_msg)
-            try:
-                await websocket.send(error_msg)
-            except:
-                print("⚠️ WebSocket 尚未建立，無法傳送錯誤訊息")
             sd.wait()
 
             # 存成暫存檔，Whisper 讀檔最穩定
@@ -71,7 +69,10 @@ async def send_translation(websocket):
         except Exception as e:
             error_msg = f"⚠️ 錄音錯誤: {e}"
             print(error_msg)
-            await websocket.send(error_msg)
+            try:
+                await websocket.send(error_msg)
+            except:
+                print("⚠️ WebSocket 尚未建立，無法傳送錯誤訊息")
 
 async def main():
     async with websockets.serve(send_translation, "localhost", 8765):
