@@ -15,6 +15,12 @@ sample_rate = 48000  # Virtual Cable 常用支援的取樣率
 device_id = 40       # WASAPI 的 CABLE Output
 channels = 2
 
+try:
+    sd.check_input_settings(device=device_id, samplerate=sample_rate, channels=channels)
+except Exception as e:
+    print(f"⚠️ 錯誤：裝置設定不支援 → {e}")
+    return
+    
 async def send_translation(websocket): 
     while True:
         try:
@@ -26,6 +32,13 @@ async def send_translation(websocket):
                 dtype='float32',
                 device=device_id
             )
+            except Exception as e:
+            error_msg = f"⚠️ 系統錯誤: {e}"
+            print(error_msg)
+            try:
+                await websocket.send(error_msg)
+            except:
+                print("⚠️ WebSocket 尚未建立，無法傳送錯誤訊息")
             sd.wait()
 
             # 存成暫存檔，Whisper 讀檔最穩定
