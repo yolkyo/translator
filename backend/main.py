@@ -35,7 +35,7 @@ async def send_translation(websocket):
                 result = model.transcribe("temp.wav", fp16=False)
                 original_text = result["text"].strip()
 
-                if original_text:
+                if original_text and len(original_text) > 2:
                     translated = translator.translate(original_text, src="auto", dest="zh-TW")
                     try:
                         await websocket.send(f"{original_text}||{translated.text}")
