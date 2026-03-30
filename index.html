@@ -10,25 +10,24 @@
       font-family: Arial, sans-serif;
     }
     #output {
-      height: 400px;
+      height: 200px;
       overflow-y: auto;
       border: 1px solid #444;
       padding: 10px;
     }
-    .line {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
+    .subtitle-block {
+      margin-bottom: 15px;
     }
     .original {
-      width: 48%;
-      text-align: left;
+      text-align: center;
       color: #aaa; /* 原文灰白色 */
+      font-size: 20px;
     }
     .translated {
-      width: 48%;
-      text-align: right;
+      text-align: center;
       color: #fff; /* 翻譯純白色 */
+      font-size: 22px;
+      font-weight: bold;
     }
     #controls {
       margin-top: 10px;
@@ -65,34 +64,40 @@
     let socket = null;
 
     function startTranslation() {
-      if (socket && socket.readyState === WebSocket.OPEN) return; // 已連線就不重複
+      if (socket && socket.readyState === WebSocket.OPEN) return;
       socket = new WebSocket("ws://localhost:8765");
       socket.onopen = function() {
         document.getElementById("status").textContent = "狀態：翻譯中";
-        document.getElementById("status").style.color = "#0f0"; // 綠色
+        document.getElementById("status").style.color = "#0f0";
       };
       socket.onclose = function() {
         document.getElementById("status").textContent = "狀態：已停止";
-        document.getElementById("status").style.color = "#f00"; // 紅色
+        document.getElementById("status").style.color = "#f00";
       };
       socket.onmessage = function(event) {
         const output = document.getElementById("output");
         const [original, translated] = event.data.split("||");
 
-        const div = document.createElement("div");
-        div.className = "line";
+        const block = document.createElement("div");
+        block.className = "subtitle-block";
 
-        const origSpan = document.createElement("span");
-        origSpan.className = "original";
-        origSpan.textContent = original;
+        const origDiv = document.createElement("div");
+        origDiv.className = "original";
+        origDiv.textContent = original;
 
-        const transSpan = document.createElement("span");
-        transSpan.className = "translated";
-        transSpan.textContent = translated;
+        const transDiv = document.createElement("div");
+        transDiv.className = "translated";
+        transDiv.textContent = translated;
 
-        div.appendChild(origSpan);
-        div.appendChild(transSpan);
-        output.appendChild(div);
+        block.appendChild(origDiv);
+        block.appendChild(transDiv);
+        output.appendChild(block);
+
+        // 保持最多兩句（四行）
+        const blocks = output.getElementsByClassName("subtitle-block");
+        if (blocks.length > 2) {
+          output.removeChild(blocks[0]); // 移除最舊的一句
+        }
 
         // 自動捲到最新字幕
         output.scrollTop = output.scrollHeight;
