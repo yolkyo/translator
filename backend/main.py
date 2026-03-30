@@ -13,9 +13,6 @@ translator = Translator()
 duration = 5        # 每次錄音秒數
 sample_rate = 16000 # 取樣率
 
-# 指定音訊裝置 (先用 sd.query_devices() 找出正確名稱或編號)
-sd.default.device = (6, None)  # 使用 CABLE Input (VB-Audio Virtual Cable)
-
 async def send_translation(websocket): 
     while True:
         print("🎧 錄製直播音訊中...")
