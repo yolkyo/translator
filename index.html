@@ -3,6 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <title>即時翻譯字幕</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    #output {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #444;
+      padding: 10px;
+    }
+    .line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .original {
+      width: 48%;
+      text-align: left;
+      color: #aaa; /* 原文灰白色 */
+    }
+    .translated {
+      width: 48%;
+      text-align: right;
+      color: #fff; /* 翻譯純白色 */
+    }
+  </style>
 </head>
 <body>
   <h1>即時翻譯字幕</h1>
@@ -12,9 +40,25 @@
     const socket = new WebSocket("ws://localhost:8765");
     socket.onmessage = function(event) {
       const output = document.getElementById("output");
-      const p = document.createElement("p");
-      p.textContent = event.data;
-      output.appendChild(p);
+      const [original, translated] = event.data.split("||");
+
+      const div = document.createElement("div");
+      div.className = "line";
+
+      const origSpan = document.createElement("span");
+      origSpan.className = "original";
+      origSpan.textContent = original;
+
+      const transSpan = document.createElement("span");
+      transSpan.className = "translated";
+      transSpan.textContent = translated;
+
+      div.appendChild(origSpan);
+      div.appendChild(transSpan);
+      output.appendChild(div);
+
+      // 自動捲到最新字幕
+      output.scrollTop = output.scrollHeight;
     };
   </script>
 </body>
