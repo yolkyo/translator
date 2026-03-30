@@ -8,50 +8,56 @@
       background-color: black;
       color: white;
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
     }
     #output {
-      height: 200px;
+      height: 30vh; /* 視窗高度的 30% */
       overflow-y: auto;
       border: 1px solid #444;
       padding: 10px;
     }
     .subtitle-block {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     .original {
       text-align: center;
       color: #aaa; /* 原文灰白色 */
-      font-size: 20px;
+      font-size: 3vw; /* 字體大小隨視窗寬度調整 */
     }
     .translated {
       text-align: center;
       color: #fff; /* 翻譯純白色 */
-      font-size: 22px;
+      font-size: 4vw; /* 字體大小隨視窗寬度調整 */
       font-weight: bold;
     }
     #controls {
-      margin-top: 10px;
+      margin-top: 15px;
+      text-align: center;
     }
     button {
       background-color: #222;
       color: white;
       border: 1px solid #555;
-      padding: 8px 16px;
-      margin-right: 10px;
+      padding: 10px 20px;
+      margin: 0 10px;
       cursor: pointer;
+      font-size: 16px;
     }
     button:hover {
       background-color: #444;
     }
     #status {
-      margin-top: 10px;
+      margin-top: 15px;
       font-weight: bold;
-      color: #0f0; /* 翻譯中顯示綠色 */
+      text-align: center;
+      color: #f00; /* 初始狀態紅色 */
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <h1>即時翻譯字幕</h1>
+  <h1 style="text-align:center;">即時翻譯字幕</h1>
   <div id="output"></div>
   <div id="controls">
     <button id="startBtn">開始翻譯</button>
@@ -62,8 +68,6 @@
 
   <script>
     let socket = null;
-      document.getElementById("status").textContent = "狀態：已停止";
-      document.getElementById("status").style.color = "#f00";
 
     function startTranslation() {
       if (socket && socket.readyState === WebSocket.OPEN) return;
@@ -95,10 +99,10 @@
         block.appendChild(transDiv);
         output.appendChild(block);
 
-        // 保持最多兩句（四行）
+        // 保持最多顯示兩組字幕
         const blocks = output.getElementsByClassName("subtitle-block");
         if (blocks.length > 2) {
-          output.removeChild(blocks[0]); // 移除最舊的一句
+          output.removeChild(blocks[0]);
         }
 
         // 自動捲到最新字幕
